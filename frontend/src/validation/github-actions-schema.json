@@ -1,0 +1,72 @@
+{
+  "type": "object",
+  "required": ["name", "on", "jobs"],
+  "properties": {
+    "name": { "type": "string" },
+    "on": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "push": {
+          "type": "object",
+          "properties": {
+            "branches": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "pull_request": {
+          "type": "object",
+          "properties": {
+            "branches": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "workflow_dispatch": { "type": "null" },
+        "schedule": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["cron"],
+            "properties": { "cron": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "jobs": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["runs-on", "steps"],
+        "properties": {
+          "runs-on": { "type": "string" },
+          "needs": { "type": "string" },
+          "if": { "type": "string" },
+          "environment": { "type": "string" },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "oneOf": [
+                {
+                  "required": ["uses"],
+                  "properties": {
+                    "uses": { "type": "string" },
+                    "if": { "type": "string" },
+                    "with": { "type": "object" }
+                  }
+                },
+                {
+                  "required": ["run"],
+                  "properties": {
+                    "run": { "type": "string" },
+                    "if": { "type": "string" }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

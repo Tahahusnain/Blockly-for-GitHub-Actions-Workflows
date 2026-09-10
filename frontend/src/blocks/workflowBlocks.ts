@@ -16,6 +16,7 @@ Blockly.common.defineBlocksWithJsonArray([
       {
         type: "input_statement",
         name: "TRIGGERS",
+        check: "Trigger",
       },
     ],
     message2: "jobs %1",
@@ -23,6 +24,7 @@ Blockly.common.defineBlocksWithJsonArray([
       {
         type: "input_statement",
         name: "JOBS",
+        check: "Job",
       },
     ],
     colour: 230,

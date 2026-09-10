@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as Blockly from "blockly/core";
 import * as libraryBlocks from "blockly/blocks";
+import { validateWorkflow } from "../validation/blockValidator";
 import "../blocks/workflowBlocks";
 import "../blocks/triggerBlocks";
 import "../blocks/jobBlocks";
@@ -9,12 +10,17 @@ import "../blocks/stepBlocks";
 import { githubActionsYamlGenerator } from "../generator/githubActionsGenerator";
 
 Blockly.common.defineBlocks(libraryBlocks.blocks);
+Blockly.Scrollbar.scrollbarThickness = 15;
 
 type BlocklyEditorProp = {
   onYamlChange: (yaml: string) => void;
+  onValidationChange: (errors: string[]) => void;
 };
 
-const BlocklyEditor = ({ onYamlChange }: BlocklyEditorProp) => {
+const BlocklyEditor = ({
+  onYamlChange,
+  onValidationChange,
+}: BlocklyEditorProp) => {
   const blocklyRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -42,6 +48,18 @@ const BlocklyEditor = ({ onYamlChange }: BlocklyEditorProp) => {
                 kind: "block",
                 type: "github_push_trigger",
               },
+              {
+                kind: "block",
+                type: "github_pull_request_trigger",
+              },
+              {
+                kind: "block",
+                type: "github_workflow_dispatch_trigger",
+              },
+              {
+                kind: "block",
+                type: "github_schedule_trigger",
+              },
             ],
           },
           {
@@ -60,28 +78,49 @@ const BlocklyEditor = ({ onYamlChange }: BlocklyEditorProp) => {
             contents: [
               {
                 kind: "block",
-                type: "github_step",
+                type: "github_uses_step",
               },
-            ],
-          },
-          {
-            kind: "category",
-            name: "Run",
-            contents: [
               {
                 kind: "block",
                 type: "github_run_step",
+              },
+              {
+                kind: "block",
+                type: "github_action_input",
               },
             ],
           },
         ],
       },
+      move: {
+        scrollbars: true,
+        drag: true,
+        wheel: true,
+      },
     });
 
     const generateYaml = () => {
-      const yaml = githubActionsYamlGenerator.workspaceToCode(workspace);
-      console.log(yaml);
+      const workflowBlock = workspace.getBlocksByType(
+        "github_workflow",
+        false,
+      )[0];
+
+      if (!workflowBlock) {
+        onYamlChange("");
+        onValidationChange([]);
+        return;
+      }
+
+      githubActionsYamlGenerator.init(workspace);
+      const code = githubActionsYamlGenerator.blockToCode(workflowBlock);
+      const yaml = typeof code === "string" ? code : code[0];
       onYamlChange(yaml);
+
+      const { errors } = validateWorkflow(yaml);
+      console.log(errors);
+      onValidationChange(
+        errors.map((err) => err.message ?? "Invalid workflow"),
+      );
     };
 
     workspace.addChangeListener(generateYaml);
@@ -92,7 +131,12 @@ const BlocklyEditor = ({ onYamlChange }: BlocklyEditorProp) => {
     };
   }, []);
 
-  return <div ref={blocklyRef} className="blockly-editor" />;
+  return (
+    <div
+      ref={blocklyRef}
+      className="h-[650px] w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg"
+    />
+  );
 };
 
 export default BlocklyEditor;
