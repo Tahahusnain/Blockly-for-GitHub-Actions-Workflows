@@ -6,6 +6,8 @@ import "../blocks/workflowBlocks";
 import "../blocks/triggerBlocks";
 import "../blocks/jobBlocks";
 import "../blocks/stepBlocks";
+import "../blocks/keyValueBlock";
+import "../blocks/ifBlock";
 
 import { githubActionsYamlGenerator } from "../generator/githubActionsGenerator";
 
@@ -84,9 +86,27 @@ const BlocklyEditor = ({
                 kind: "block",
                 type: "github_run_step",
               },
+            ],
+          },
+          {
+            kind: "category",
+            name: "Fields",
+            contents: [
               {
                 kind: "block",
-                type: "github_action_input",
+                type: "github_if",
+              },
+              {
+                kind: "block",
+                type: "github_job_needs",
+              },
+              {
+                kind: "block",
+                type: "github_job_environment",
+              },
+              {
+                kind: "block",
+                type: "github_key_value",
               },
             ],
           },

@@ -8,7 +8,7 @@ Blockly.common.defineBlocksWithJsonArray([
       {
         type: "field_input",
         name: "NAME",
-        text: "Node CI",
+        text: "enter name",
       },
     ],
     message1: "triggers %1",
@@ -19,8 +19,16 @@ Blockly.common.defineBlocksWithJsonArray([
         check: "Trigger",
       },
     ],
-    message2: "jobs %1",
+    message2: "env %1",
     args2: [
+      {
+        type: "input_statement",
+        name: "ENV",
+        check: "KeyValue",
+      },
+    ],
+    message3: "jobs %1",
+    args3: [
       {
         type: "input_statement",
         name: "JOBS",

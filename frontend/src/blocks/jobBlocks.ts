@@ -1,5 +1,5 @@
 import * as Blockly from "blockly/core";
-import { githubCache } from "../utility/githubCache";
+import { githubRunnersAndBranches } from "../context/GitHubContext";
 
 const getRunners = () => {
   const opt: [string, string][] = [
@@ -11,11 +11,9 @@ const getRunners = () => {
     ["macOS 13", "macos-13"],
   ];
 
-  if (githubCache.runners && githubCache.branches.length > 0) {
-    githubCache.runners.forEach((runner) => {
-      opt.push([`Self-Hosted: ${runner}`, runner]);
-    });
-  }
+  githubRunnersAndBranches.runners.forEach((runner) => {
+    opt.push([`Self-Hosted: ${runner}`, runner]);
+  });
   return opt;
 };
 
@@ -32,26 +30,42 @@ Blockly.common.defineBlocks({
         .appendField("runs on")
         .appendField(new Blockly.FieldDropdown(getRunners), "RUNNER");
 
-      //needs
-      this.appendDummyInput()
-        .appendField("needs")
-        .appendField(new Blockly.FieldTextInput(""), "NEEDS");
-
-      //if
-      this.appendDummyInput()
-        .appendField("if")
-        .appendField(new Blockly.FieldTextInput(""), "IF");
-      //ENVIRONMENT
-      this.appendDummyInput()
-        .appendField("environment")
-        .appendField(new Blockly.FieldTextInput(""), "ENVIRONMENT");
-      //steps
+      this.appendStatementInput("MODIFIERS")
+        .setCheck("JobModifier")
+        .appendField("options");
+      this.appendStatementInput("ENV").setCheck("KeyValue").appendField("env");
       this.appendStatementInput("STEPS").setCheck("Step").appendField("steps");
 
       this.setPreviousStatement(true, "Job");
       this.setNextStatement(true, "Job");
       this.setColour(200);
       this.setTooltip("A GitHub Actions job");
+    },
+  },
+
+  github_job_needs: {
+    init: function (this: Blockly.Block) {
+      this.appendDummyInput()
+        .appendField("needs")
+        .appendField(new Blockly.FieldTextInput(""), "NEEDS");
+
+      this.setPreviousStatement(true, "JobModifier");
+      this.setNextStatement(true, "JobModifier");
+      this.setColour(210);
+      this.setTooltip("The job(s) this job depends on");
+    },
+  },
+
+  github_job_environment: {
+    init: function (this: Blockly.Block) {
+      this.appendDummyInput()
+        .appendField("environment")
+        .appendField(new Blockly.FieldTextInput(""), "ENVIRONMENT");
+
+      this.setPreviousStatement(true, "JobModifier");
+      this.setNextStatement(true, "JobModifier");
+      this.setColour(170);
+      this.setTooltip("The deployment environment for this job");
     },
   },
 });

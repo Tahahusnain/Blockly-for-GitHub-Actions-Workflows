@@ -11,7 +11,7 @@ const validate = ajv.compile(schema);
 
 export function validateWorkflow(yamlText: string) {
   try {
-    const workflow = load(yamlText);
+    const workflow = load(yamlText); // that we made
 
     const valid = validate(workflow);
     console.log("valid ===>", valid);

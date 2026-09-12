@@ -4,6 +4,15 @@ export const githubActionsYamlGenerator = new Blockly.CodeGenerator(
   "GitHubActionsYaml",
 );
 
+function indentExtra(code: string, spaces: number): string {
+  if (!spaces) return code;
+  const prefix = " ".repeat(spaces);
+  return code
+    .split("\n")
+    .map((line) => (line ? prefix + line : line))
+    .join("\n");
+}
+
 githubActionsYamlGenerator.scrub_ = function (block, code, thisOnly) {
   const nextBlock = block.nextConnection?.targetBlock();
 
@@ -20,12 +29,13 @@ githubActionsYamlGenerator.forBlock["github_workflow"] = function (
 ) {
   const workflowName = block.getFieldValue("NAME");
   const triggers = generator.statementToCode(block, "TRIGGERS");
+  const env = generator.statementToCode(block, "ENV");
   const jobs = generator.statementToCode(block, "JOBS");
 
   return `name: ${workflowName}
 
 on:
-${triggers || "  workflow_dispatch:\n"}jobs:
+${triggers || "  workflow_dispatch:\n"}${env.trim() ? `env:\n${env}` : ""}jobs:
 ${jobs}`;
 };
 
@@ -56,10 +66,13 @@ githubActionsYamlGenerator.forBlock["github_workflow_dispatch_trigger"] =
 githubActionsYamlGenerator.forBlock["github_schedule_trigger"] = function (
   block,
 ) {
-  const cron = block.getFieldValue("CRON");
+  const hour = block.getFieldValue("HOUR");
+  const minute = block.getFieldValue("MINUTE");
+  const day = block.getFieldValue("DAY");
+  const cron = `${minute} ${hour} * * ${day}`;
 
   return `schedule:
-  - cron: "${cron}"
+  - cron: '${cron}'
 `;
 };
 
@@ -69,25 +82,16 @@ githubActionsYamlGenerator.forBlock["github_job"] = function (
 ) {
   const jobId = block.getFieldValue("JOB_ID");
   const runner = block.getFieldValue("RUNNER");
-  const needs = block.getFieldValue("NEEDS")?.trim();
-  const condition = block.getFieldValue("IF")?.trim();
-  const environment = block.getFieldValue("ENVIRONMENT")?.trim();
+  const modifiers = generator.statementToCode(block, "MODIFIERS");
+  const env = generator.statementToCode(block, "ENV");
   const steps = generator.statementToCode(block, "STEPS");
 
   let code = `${jobId}:
-`;
+${modifiers}`;
 
-  if (needs) {
-    code += `  needs: ${needs}
-`;
-  }
-
-  if (condition) {
-    code += `  if: ${condition}\n`;
-  }
-
-  if (environment) {
-    code += `  environment: ${environment}\n`;
+  if (env.trim()) {
+    code += `  env:
+${indentExtra(env, 2)}`;
   }
 
   code += `  runs-on: ${runner}
@@ -101,40 +105,80 @@ githubActionsYamlGenerator.forBlock["github_uses_step"] = function (
   block,
   generator,
 ) {
+  const name = block.getFieldValue("NAME")?.trim();
   const action = block.getFieldValue("ACTION");
-  const condition = block.getFieldValue("IF")?.trim();
+  const modifiers = generator.statementToCode(block, "MODIFIERS");
   const inputs = generator.statementToCode(block, "WITH");
+  const env = generator.statementToCode(block, "ENV");
 
-  let code = `  - uses: ${action}\n`;
-
-  if (condition) {
-    code += `    if: ${condition}\n`;
+  let code = "";
+  if (name) {
+    code += `  - name: ${name}\n    uses: ${action}\n`;
+  } else {
+    code += `  - uses: ${action}\n`;
   }
+
+  code += indentExtra(modifiers, 2);
 
   if (inputs.trim()) {
     code += `    with:
-${inputs}`;
+${indentExtra(inputs, 4)}`;
+  }
+
+  if (env.trim()) {
+    code += `    env:
+${indentExtra(env, 4)}`;
   }
 
   return code;
 };
 
-githubActionsYamlGenerator.forBlock["github_run_step"] = function (block) {
+githubActionsYamlGenerator.forBlock["github_run_step"] = function (
+  block,
+  generator,
+) {
+  const name = block.getFieldValue("NAME")?.trim();
   const command = block.getFieldValue("COMMAND");
-  const condition = block.getFieldValue("IF")?.trim();
+  const modifiers = generator.statementToCode(block, "MODIFIERS");
+  const env = generator.statementToCode(block, "ENV");
 
-  let code = `  - run: ${command}\n`;
+  let code = "";
+  if (name) {
+    code += `  - name: ${name}\n    run: ${command}\n`;
+  } else {
+    code += `  - run: ${command}\n`;
+  }
 
-  if (condition) {
-    code += `    if: ${condition}\n`;
+  code += indentExtra(modifiers, 2);
+
+  if (env.trim()) {
+    code += `    env:
+${indentExtra(env, 4)}`;
   }
 
   return code;
 };
 
-githubActionsYamlGenerator.forBlock["github_action_input"] = function (block) {
+githubActionsYamlGenerator.forBlock["github_job_needs"] = function (block) {
+  const needs = block.getFieldValue("NEEDS")?.trim();
+  return needs ? `needs: ${needs}\n` : "";
+};
+
+githubActionsYamlGenerator.forBlock["github_job_environment"] = function (
+  block,
+) {
+  const environment = block.getFieldValue("ENVIRONMENT")?.trim();
+  return environment ? `environment: ${environment}\n` : "";
+};
+
+githubActionsYamlGenerator.forBlock["github_if"] = function (block) {
+  const condition = block.getFieldValue("IF")?.trim();
+  return condition ? `if: ${condition}\n` : "";
+};
+
+githubActionsYamlGenerator.forBlock["github_key_value"] = function (block) {
   const key = block.getFieldValue("KEY");
   const value = block.getFieldValue("VALUE");
 
-  return `    ${key}: ${value}\n`;
+  return `${key}: ${value}\n`;
 };

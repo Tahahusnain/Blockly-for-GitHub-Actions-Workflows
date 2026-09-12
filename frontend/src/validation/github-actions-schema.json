@@ -3,6 +3,7 @@
   "required": ["name", "on", "jobs"],
   "properties": {
     "name": { "type": "string" },
+    "env": { "type": "object" },
     "on": {
       "type": "object",
       "minProperties": 1,
@@ -41,6 +42,7 @@
           "needs": { "type": "string" },
           "if": { "type": "string" },
           "environment": { "type": "string" },
+          "env": { "type": "object" },
           "steps": {
             "type": "array",
             "minItems": 1,
@@ -50,16 +52,20 @@
                 {
                   "required": ["uses"],
                   "properties": {
+                    "name": { "type": "string" },
                     "uses": { "type": "string" },
                     "if": { "type": "string" },
-                    "with": { "type": "object" }
+                    "with": { "type": "object" },
+                    "env": { "type": "object" }
                   }
                 },
                 {
                   "required": ["run"],
                   "properties": {
+                    "name": { "type": "string" },
                     "run": { "type": "string" },
-                    "if": { "type": "string" }
+                    "if": { "type": "string" },
+                    "env": { "type": "object" }
                   }
                 }
               ]

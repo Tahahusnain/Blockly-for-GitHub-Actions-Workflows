@@ -1,13 +1,19 @@
 import { backendClient } from "./httpClient";
 
-export const getWorkflowJob = async (
+export const deployGitWorkflow = async (
   owner: string,
   repo: string,
-  jobId: string | number,
+  yaml: string,
+  branch: string,
 ) => {
-  const { data } = await backendClient.get(
-    `/github/jobs/${owner}/${repo}/${jobId}`,
-  );
+  const res = await backendClient.put(`/github/workflow/${owner}/${repo}`, {
+    yaml,
+    branch,
+  });
+  return res.data;
+};
 
-  return data;
+export const logoutUser = async () => {
+  const res = await backendClient.post("/auth/logout");
+  return res.data;
 };

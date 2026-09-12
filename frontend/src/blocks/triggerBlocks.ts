@@ -1,12 +1,31 @@
 import * as Blockly from "blockly/core";
-import { githubCache } from "../utility/githubCache";
+import { githubRunnersAndBranches } from "../context/GitHubContext";
 
 function getBranches(): [string, string][] {
-  if (githubCache.branches && githubCache.branches.length > 0) {
-    return githubCache.branches.map((branch) => [branch, branch]);
+  if (githubRunnersAndBranches.branches.length > 0) {
+    return githubRunnersAndBranches.branches.map((branch) => [branch, branch]);
   }
   return [["main", "main"]];
 }
+
+const HOURS: [string, string][] = Array.from({ length: 24 }, (_, h) => {
+  const val = h.toString().padStart(2, "0");
+  return [val, val];
+});
+
+const MINUTES: [string, string][] = ["00", "15", "30", "45"].map((m) => [m, m]);
+
+const DAYS: [string, string][] = [
+  ["Every day", "*"],
+  ["Monday", "1"],
+  ["Tuesday", "2"],
+  ["Wednesday", "3"],
+  ["Thursday", "4"],
+  ["Friday", "5"],
+  ["Saturday", "6"],
+  ["Sunday", "0"],
+  ["Weekdays (Mon–Fri)", "1-5"],
+];
 
 Blockly.common.defineBlocks({
   github_push_trigger: {
@@ -47,30 +66,17 @@ Blockly.common.defineBlocks({
   github_schedule_trigger: {
     init: function (this: Blockly.Block) {
       this.appendDummyInput()
-        .appendField("schedule")
-        .appendField("cron")
-        .appendField(new Blockly.FieldTextInput("0 9 * * 1"), "CRON");
+        .appendField("run at")
+        .appendField(new Blockly.FieldDropdown(HOURS), "HOUR")
+        .appendField(":")
+        .appendField(new Blockly.FieldDropdown(MINUTES), "MINUTE")
+        .appendField("on")
+        .appendField(new Blockly.FieldDropdown(DAYS), "DAY");
 
       this.setPreviousStatement(true, "Trigger");
       this.setNextStatement(true, "Trigger");
       this.setColour(120);
+      this.setTooltip("Run this workflow on a schedule");
     },
   },
 });
-
-// Blockly.common.defineBlocksWithJsonArray([
-//   {
-//     type: "github_push_trigger",
-//     message0: "on push to branch %1",
-//     args0: [
-//       {
-//         type: "field_input",
-//         name: "BRANCH",
-//         text: "main",
-//       },
-//     ],
-//     previousStatement: null,
-//     nextStatement: null,
-//     colour: 120,
-//   },
-// ]);
