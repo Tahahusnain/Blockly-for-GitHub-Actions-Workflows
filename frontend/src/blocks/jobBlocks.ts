@@ -3,12 +3,9 @@ import { githubRunnersAndBranches } from "../context/GitHubContext";
 
 const getRunners = () => {
   const opt: [string, string][] = [
-    ["Ubuntu latest (24.04)", "ubuntu-latest"],
-    ["Ubuntu 22.04", "ubuntu-22.04"],
+    ["Ubuntu latest", "ubuntu-latest"],
     ["Windows latest", "windows-latest"],
-    ["Windows 2022", "windows-2022"],
-    ["macOS latest (14)", "macos-latest"],
-    ["macOS 13", "macos-13"],
+    ["macOS latest", "macos-latest"],
   ];
 
   githubRunnersAndBranches.runners.forEach((runner) => {
