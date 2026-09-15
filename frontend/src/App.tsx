@@ -108,7 +108,7 @@ function Editor() {
             disabled={github?.isSyncing}
             className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-green-700 disabled:bg-slate-400"
           >
-            {github?.isSyncing ? "Syncing..." : "Sync Runners"}
+            {github?.isSyncing ? "Syncing..." : "Sync"}
           </button>
         </div>
       </div>

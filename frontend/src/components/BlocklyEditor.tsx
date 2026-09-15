@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as Blockly from "blockly/core";
 import * as libraryBlocks from "blockly/blocks";
-import { validateWorkflow } from "../validation/blockValidator";
+import { workflowValidator, validateWorkflow } from "../validation/blockValidator";
 import "../blocks/workflowBlocks";
 import "../blocks/triggerBlocks";
 import "../blocks/jobBlocks";
@@ -117,6 +117,7 @@ const BlocklyEditor = ({
         drag: true,
         wheel: true,
       },
+      modalInputs: false,
     });
 
     const generateYaml = () => {
@@ -144,6 +145,7 @@ const BlocklyEditor = ({
     };
 
     workspace.addChangeListener(generateYaml);
+    workflowValidator().then(generateYaml);
 
     return () => {
       workspace.removeChangeListener(generateYaml);

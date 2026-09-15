@@ -13,7 +13,7 @@ export const githubRunnersAndBranches: {
   branches: string[];
 } = {
   runners: [],
-  branches: ["main"],
+  branches: [],
 };
 
 interface Runner {
@@ -48,7 +48,7 @@ export const GitHubProvider = ({ children }: { children: ReactNode }) => {
   const [repo, setRepo] = useState<string>("");
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [runners, setRunners] = useState<string[]>([]);
-  const [branches, setBranches] = useState<string[]>(["main"]);
+  const [branches, setBranches] = useState<string[]>([]);
 
   useEffect(() => {
     githubRunnersAndBranches.runners = runners;
@@ -64,7 +64,7 @@ export const GitHubProvider = ({ children }: { children: ReactNode }) => {
     setOwner("");
     setRepo("");
     setRunners([]);
-    setBranches(["main"]);
+    setBranches([]);
   };
 
   const fetchRepoData = async (
@@ -110,9 +110,7 @@ export const GitHubProvider = ({ children }: { children: ReactNode }) => {
 
       if (branchesResult.status === "fulfilled") {
         const data = branchesResult.value.data;
-        setBranches(
-          Array.isArray(data) ? data.map((res) => res.name) : ["main"],
-        );
+        setBranches(Array.isArray(data) ? data.map((res) => res.name) : []);
       } else {
         error = apiError("branches", branchesResult.reason);
       }

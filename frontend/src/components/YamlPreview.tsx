@@ -2,8 +2,10 @@ import { downloadTextFile } from "../utility/downloadTextFile";
 import { useGitHub } from "../context/GitHubContext";
 import { useState } from "react";
 import { deployGitWorkflow } from "../utility/githubApi";
-import Select, { type SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 import type { AlertColor } from "@mui/material";
 
 type YamlPreviewProps = {
@@ -15,15 +17,14 @@ type YamlPreviewProps = {
 const YamlPreview = ({ yaml, validationErrors, notify }: YamlPreviewProps) => {
   const github = useGitHub();
   const [isDeploying, setIsDeploying] = useState(false);
-  const [deployBranch, setDeployBranch] = useState("main");
+  const [deployBranch, setDeployBranch] = useState("");
 
   const isValid = validationErrors.length === 0;
 
-  const branchOptions =
-    github && github.branches.length ? github.branches : ["main"];
+  const branchOptions = github?.branches ?? [];
   const selectedBranch = branchOptions.includes(deployBranch)
     ? deployBranch
-    : branchOptions[0];
+    : (branchOptions[0] ?? "");
 
   const handleDownload = (isValid: boolean): void => {
     // console.log(isValid);
@@ -70,20 +71,27 @@ const YamlPreview = ({ yaml, validationErrors, notify }: YamlPreviewProps) => {
             onClick={() => handleDownload(isValid)}
             disabled={!yaml || !isValid}
           >
-            Download YAML ↓
+            Download YAML
           </button>
-          <Select
-            value={selectedBranch}
-            onChange={(e: SelectChangeEvent) => setDeployBranch(e.target.value)}
-            disabled={!yaml || !isValid}
+          <FormControl
             size="small"
+            disabled={!yaml || !isValid}
+            sx={{ minWidth: 160 }}
           >
-            {branchOptions.map((b) => (
-              <MenuItem key={b} value={b}>
-                {b}
-              </MenuItem>
-            ))}
-          </Select>
+            <InputLabel id="branch-select-label">Branch</InputLabel>
+            <Select
+              labelId="branch-select-label"
+              value={selectedBranch}
+              label="Branch"
+              onChange={(e) => setDeployBranch(e.target.value)}
+            >
+              {branchOptions.map((b) => (
+                <MenuItem key={b} value={b}>
+                  {b}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <button
             className="flex items-center gap-2 rounded-lg bg-sky-600 px-4.5 py-2.5 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-sky-700 hover:shadow-lg active:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-400 disabled:shadow-none disabled:hover:translate-y-0"
             onClick={() => handleDeployToGithub(isValid)}
