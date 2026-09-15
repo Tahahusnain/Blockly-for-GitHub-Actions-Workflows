@@ -7,8 +7,8 @@ Blockly.common.defineBlocks({
         .appendField("if")
         .appendField(new Blockly.FieldTextInput(""), "IF");
 
-      this.setPreviousStatement(true, ["JobModifier", "StepModifier"]);
-      this.setNextStatement(true, ["JobModifier", "StepModifier"]);
+      this.setPreviousStatement(true, ["jobOption", "stepOption"]);
+      this.setNextStatement(true, ["jobOption", "stepOption"]);
       this.setColour(190);
       this.setTooltip("A condition for a job or step to run");
     },

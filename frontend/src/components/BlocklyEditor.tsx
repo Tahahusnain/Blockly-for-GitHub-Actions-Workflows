@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import * as Blockly from "blockly/core";
 import * as libraryBlocks from "blockly/blocks";
-import { workflowValidator, validateWorkflow } from "../validation/blockValidator";
+import {
+  workflowValidator,
+  validateWorkflow,
+} from "../validation/blockValidator";
 import "../blocks/workflowBlocks";
 import "../blocks/triggerBlocks";
 import "../blocks/jobBlocks";
@@ -94,6 +97,10 @@ const BlocklyEditor = ({
             contents: [
               {
                 kind: "block",
+                type: "github_step_name",
+              },
+              {
+                kind: "block",
                 type: "github_if",
               },
               {
@@ -117,7 +124,6 @@ const BlocklyEditor = ({
         drag: true,
         wheel: true,
       },
-      modalInputs: false,
     });
 
     const generateYaml = () => {

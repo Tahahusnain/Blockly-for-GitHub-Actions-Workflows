@@ -27,8 +27,8 @@ Blockly.common.defineBlocks({
         .appendField("runs on")
         .appendField(new Blockly.FieldDropdown(getRunners), "RUNNER");
 
-      this.appendStatementInput("MODIFIERS")
-        .setCheck("JobModifier")
+      this.appendStatementInput("OPTIONS")
+        .setCheck("jobOption")
         .appendField("options");
       this.appendStatementInput("ENV").setCheck("KeyValue").appendField("env");
       this.appendStatementInput("STEPS").setCheck("Step").appendField("steps");
@@ -46,8 +46,8 @@ Blockly.common.defineBlocks({
         .appendField("needs")
         .appendField(new Blockly.FieldTextInput(""), "NEEDS");
 
-      this.setPreviousStatement(true, "JobModifier");
-      this.setNextStatement(true, "JobModifier");
+      this.setPreviousStatement(true, "jobOption");
+      this.setNextStatement(true, "jobOption");
       this.setColour(210);
       this.setTooltip("The job(s) this job depends on");
     },
@@ -59,8 +59,8 @@ Blockly.common.defineBlocks({
         .appendField("environment")
         .appendField(new Blockly.FieldTextInput(""), "ENVIRONMENT");
 
-      this.setPreviousStatement(true, "JobModifier");
-      this.setNextStatement(true, "JobModifier");
+      this.setPreviousStatement(true, "jobOption");
+      this.setNextStatement(true, "jobOption");
       this.setColour(170);
       this.setTooltip("The deployment environment for this job");
     },

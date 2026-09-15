@@ -13,6 +13,30 @@ function indentExtra(code: string, spaces: number): string {
     .join("\n");
 }
 
+function getStepName(
+  block: Blockly.Block,
+  generator: Blockly.CodeGenerator,
+): { name: string; modifiers: string } {
+  const firstOption = block.getInputTargetBlock("OPTIONS");
+
+  if (!firstOption || firstOption.type !== "github_step_name") {
+    return {
+      name: "",
+      modifiers: generator.statementToCode(block, "OPTIONS"),
+    };
+  }
+
+  const name = firstOption.getFieldValue("NAME")?.trim() ?? "";
+  const restBlock = firstOption.getNextBlock();
+  const restCode = restBlock ? generator.blockToCode(restBlock) : "";
+  const modifiers = indentExtra(
+    typeof restCode === "string" ? restCode : restCode[0],
+    2,
+  );
+
+  return { name, modifiers };
+}
+
 githubActionsYamlGenerator.scrub_ = function (block, code, thisOnly) {
   const nextBlock = block.nextConnection?.targetBlock();
 
@@ -82,7 +106,7 @@ githubActionsYamlGenerator.forBlock["github_job"] = function (
 ) {
   const jobId = block.getFieldValue("JOB_ID");
   const runner = block.getFieldValue("RUNNER");
-  const modifiers = generator.statementToCode(block, "MODIFIERS");
+  const modifiers = generator.statementToCode(block, "OPTIONS");
   const env = generator.statementToCode(block, "ENV");
   const steps = generator.statementToCode(block, "STEPS");
 
@@ -105,19 +129,14 @@ githubActionsYamlGenerator.forBlock["github_uses_step"] = function (
   block,
   generator,
 ) {
-  const name = block.getFieldValue("NAME")?.trim();
   const action = block.getFieldValue("ACTION");
-  const modifiers = generator.statementToCode(block, "MODIFIERS");
+  const { name, modifiers } = getStepName(block, generator);
   const inputs = generator.statementToCode(block, "WITH");
   const env = generator.statementToCode(block, "ENV");
 
-  let code = "";
-  if (name) {
-    code += `  - name: ${name}\n    uses: ${action}\n`;
-  } else {
-    code += `  - uses: ${action}\n`;
-  }
-
+  let code = name
+    ? `  - name: ${name}\n    uses: ${action}\n`
+    : `  - uses: ${action}\n`;
   code += indentExtra(modifiers, 2);
 
   if (inputs.trim()) {
@@ -137,17 +156,13 @@ githubActionsYamlGenerator.forBlock["github_run_step"] = function (
   block,
   generator,
 ) {
-  const name = block.getFieldValue("NAME")?.trim();
   const command = block.getFieldValue("COMMAND");
-  const modifiers = generator.statementToCode(block, "MODIFIERS");
+  const { name, modifiers } = getStepName(block, generator);
   const env = generator.statementToCode(block, "ENV");
 
-  let code = "";
-  if (name) {
-    code += `  - name: ${name}\n    run: ${command}\n`;
-  } else {
-    code += `  - run: ${command}\n`;
-  }
+  let code = name
+    ? `  - name: ${name}\n    run: ${command}\n`
+    : `  - run: ${command}\n`;
 
   code += indentExtra(modifiers, 2);
 
@@ -174,6 +189,11 @@ githubActionsYamlGenerator.forBlock["github_job_environment"] = function (
 githubActionsYamlGenerator.forBlock["github_if"] = function (block) {
   const condition = block.getFieldValue("IF")?.trim();
   return condition ? `if: ${condition}\n` : "";
+};
+
+githubActionsYamlGenerator.forBlock["github_step_name"] = function (block) {
+  const name = block.getFieldValue("NAME")?.trim();
+  return name ? `name: ${name}\n` : "";
 };
 
 githubActionsYamlGenerator.forBlock["github_key_value"] = function (block) {
