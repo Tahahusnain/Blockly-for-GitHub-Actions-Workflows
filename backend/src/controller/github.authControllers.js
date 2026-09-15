@@ -17,13 +17,13 @@ export const authController = {
     }
 
     try {
-      const { accessToken, user } = await authService.handleCallback(code);
+      const { accessToken } = await authService.handleCallback(code);
       res.cookie("gh_token", accessToken, {
         httpOnly: true,
         secure: true,
         sameSite: "lax",
       });
-      res.redirect(`${process.env.CLIENT_URL}?login=sucess&user=${user.login}`);
+      res.redirect(process.env.CLIENT_URL);
     } catch (error) {
       console.error("OAuth callback failed:", error);
       res.status(502).json({ error: "GitHub OAuth failed" });

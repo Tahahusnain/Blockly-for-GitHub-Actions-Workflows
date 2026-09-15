@@ -29,10 +29,6 @@ export const authService = {
       throw createApiError(400, tokenData);
     }
 
-    const user = await authRepository.getAuthenticatedUser(
-      tokenData.access_token,
-    );
-
-    return { accessToken: tokenData.access_token, user };
+    return { accessToken: tokenData.access_token };
   },
 };
